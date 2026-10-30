@@ -24,6 +24,16 @@ class UserModel:
             user = cursor.fetchone()
             cursor.close()
             return user
-        return None
+
+    def register_user(self, username, password, role="anggota"):
+      if self.conn:
+          cursor = self.conn.cursor()
+          password_hash = self.hash_password(password)
+          query = "INSERT INTO users (username, password, role) VALUES (%s, %s, %s)"
+          cursor.execute(query, (username, password_hash, role))
+          self.conn.commit()
+          cursor.close()
+          return True
+      return False
 
     

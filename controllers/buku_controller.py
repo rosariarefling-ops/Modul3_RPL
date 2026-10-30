@@ -19,6 +19,7 @@ class BukuController:
         self.view.btn_update.configure(command=self.perbarui_data)
         self.view.btn_delete.configure(command=self.hapus_data)
         self.view.tabel.bind("<<TreeviewSelect>>", self.pilih_data_tabel)
+        self.view.btn_logout.configure(command=self.logout)
         self.selected_id = None
 
         # OTORISASI: Jika bukan admin, nonaktifkan form input dan tombol simpan
@@ -110,6 +111,14 @@ class BukuController:
             if berhasil:
                 messagebox.showinfo("Sukses", "Data buku berhasil dihapus!")
                 self.muat_data_tabel()
+
+    def logout(self):
+        # Menutup jendela perpustakaan saat ini
+        self.view.destroy()
+        # Membuka kembali jendela Login View melalui AuthController
+        from controllers.auth_controller import AuthController
+        app_auth = AuthController()
+        app_auth.run()
 
     # Fungsi untuk menjalankan aplikasi
     def run(self):
