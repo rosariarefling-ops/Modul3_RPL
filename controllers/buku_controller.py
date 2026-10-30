@@ -4,11 +4,15 @@ from models.buku_model import BukuModel
 from views.buku_view import BukuView
 
 class BukuController:
-    def __init__(self):
+    def __init__(self, user_role="anggota"):
+        self.user_role = user_role
         # Menginisialisasi Model dan View
         self.model = BukuModel()
         self.view = BukuView()
-        
+
+        # Menampilkan informasi role pada judul jendela aplikasi
+        self.view.title(f"Sistem Manajemen Perpustakaan - Mode: {self.user_role.upper()}")
+
         # Binding (mengikat) tombol di View dengan fungsi di Controller
         self.view.btn_simpan.configure(command=self.simpan_data)
         # Binding tombol perbarui, hapus, dan klik tabel
@@ -16,7 +20,16 @@ class BukuController:
         self.view.btn_delete.configure(command=self.hapus_data)
         self.view.tabel.bind("<<TreeviewSelect>>", self.pilih_data_tabel)
         self.selected_id = None
-        
+
+        # OTORISASI: Jika bukan admin, nonaktifkan form input dan tombol simpan
+        if self.user_role != "admin":
+            self.view.btn_simpan.configure(state="disabled", text="Akses Terkunci (Khusus Admin)")
+            self.view.btn_update.configure(state="disabled")
+            self.view.btn_delete.configure(state="disabled")
+            self.view.entry_judul.configure(state="disabled")
+            self.view.entry_penulis.configure(state="disabled")
+            self.view.entry_tahun.configure(state="disabled")
+
         # Memuat data ke tabel saat aplikasi pertama kali dibuka
         self.muat_data_tabel()
         
@@ -31,8 +44,14 @@ class BukuController:
         # Memasukkan data baru ke dalam tabel View
         for buku in data_buku:
             self.view.tabel.insert("", "end", values=(buku["id_buku"], buku["judul"], buku["penulis"], buku["tahun_terbit"]))
-            
+
+# Rosaria Reflin Gala_029            
     def simpan_data(self):
+        # Proteksi ganda di level Controller[cite: 18]
+        if self.user_role != "admin":
+            messagebox.showerror("Akses Ditolak", "Anda tidak memiliki izin untuk menambah data!")
+            return
+        
         # Mengambil teks dari inputan di View
         judul = self.view.entry_judul.get()
         penulis = self.view.entry_penulis.get()
@@ -55,9 +74,9 @@ class BukuController:
             # Muat ulang tabel agar data baru muncul
             self.muat_data_tabel()
         else:
-            messagebox.showerror("Error", "Terjadi kesalahan saat menyimpan data.")
+            messagebox.showerror("Error", "Gagal menyimpan data.")
 
-    # === TAMBAHAN UNTUK TUGAS 1 ===
+    # === TAMBAHAN UNTUK TUGAS ===
     def pilih_data_tabel(self, event):
      selected_item = self.view.tabel.selection()
      if selected_item:
