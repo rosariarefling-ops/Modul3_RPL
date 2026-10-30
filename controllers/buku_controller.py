@@ -11,6 +11,11 @@ class BukuController:
         
         # Binding (mengikat) tombol di View dengan fungsi di Controller
         self.view.btn_simpan.configure(command=self.simpan_data)
+        # Binding tombol perbarui, hapus, dan klik tabel
+        self.view.btn_update.configure(command=self.perbarui_data)
+        self.view.btn_delete.configure(command=self.hapus_data)
+        self.view.tabel.bind("<<TreeviewSelect>>", self.pilih_data_tabel)
+        self.selected_id = None
         
         # Memuat data ke tabel saat aplikasi pertama kali dibuka
         self.muat_data_tabel()
@@ -51,7 +56,42 @@ class BukuController:
             self.muat_data_tabel()
         else:
             messagebox.showerror("Error", "Terjadi kesalahan saat menyimpan data.")
-            
+
+    # === TAMBAHAN UNTUK TUGAS 1 ===
+    def pilih_data_tabel(self, event):
+     selected_item = self.view.tabel.selection()
+     if selected_item:
+         values = self.view.tabel.item(selected_item[0], "values")
+         self.selected_id = values[0]
+         self.view.entry_judul.delete(0, 'end')
+         self.view.entry_judul.insert(0, values[1])
+         self.view.entry_penulis.delete(0, 'end')
+         self.view.entry_penulis.insert(0, values[2])
+         self.view.entry_tahun.delete(0, 'end')
+         self.view.entry_tahun.insert(0, values[3])
+
+    def perbarui_data(self):
+        if not self.selected_id:
+            messagebox.showwarning("Peringatan", "Pilih data di tabel terlebih dahulu!")
+            return
+        judul = self.view.entry_judul.get()
+        penulis = self.view.entry_penulis.get()
+        tahun = self.view.entry_tahun.get()
+        berhasil = self.model.update_buku(self.selected_id, judul, penulis, tahun)
+        if berhasil:
+            messagebox.showinfo("Sukses", "Data buku berhasil diperbarui!")
+            self.muat_data_tabel()
+
+    def hapus_data(self):
+        if not self.selected_id:
+            messagebox.showwarning("Peringatan", "Pilih data di tabel terlebih dahulu!")
+            return
+        if messagebox.askyesno("Konfirmasi", "Apakah Anda yakin ingin menghapus data ini?"):
+            berhasil = self.model.delete_buku(self.selected_id)
+            if berhasil:
+                messagebox.showinfo("Sukses", "Data buku berhasil dihapus!")
+                self.muat_data_tabel()
+
     # Fungsi untuk menjalankan aplikasi
     def run(self):
         self.view.mainloop()

@@ -27,4 +27,17 @@ class BukuModel:
             cursor.close()
             return True
         return False
-    
+
+    def update_buku(self, id_buku, judul, penulis, tahun_terbit):
+        cursor = self.conn.cursor()
+        query = "UPDATE buku SET judul = %s, penulis = %s, tahun_terbit = %s WHERE id_buku = %s"
+        cursor.execute(query, (judul, penulis, tahun_terbit, id_buku))
+        self.conn.commit()
+        return True
+
+    def delete_buku(self, id_buku):
+        cursor = self.conn.cursor()
+        query = "DELETE FROM buku WHERE id_buku = %s"
+        cursor.execute(query, (id_buku,))
+        self.conn.commit()
+        return True
